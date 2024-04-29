@@ -1,0 +1,6 @@
+opencv-contrib-python
+tensorflow==2.8.0
+tflearn
+Pillow==9.0.1
+protobuf==3.12.4
+
