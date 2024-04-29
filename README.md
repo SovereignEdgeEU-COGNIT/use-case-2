@@ -1,7 +1,7 @@
 # Use Case 2 - Wildfire Detection
 This repository contains the wildfire image recognition function offloaded to the COGNIT framework to perform the preliminary tests, some images to tests the algorithm on as well as an example of FaaS call.
 
-The repository contains an *examples* folder where the software and the images to run the tests are stored (more information about the COGNIT device runtime can be found at: https://github.com/SovereignEdgeEU-COGNIT/device-runtime-py) and a *FireUC* folder that should be uploaded to the COGNIT framework image to help the set up of the image itself. It contains a *requirements.txt* file to install the required Python libraries as well as the *pre-trained neural network model in TensorFlow format* called in the function.
+The repository contains an *examples* folder where the software and the images to run the tests are stored (more information about the COGNIT device runtime can be found at: https://github.com/SovereignEdgeEU-COGNIT/device-runtime-py) and a *FireUC* folder that should be uploaded to the COGNIT framework image to help the set up of the image itself. It contains a *requirements.txt* file to install the required Python libraries as well as the *pre-trained neural network model* in TensorFlow format called in the function.
 
 ## Neural network model
 The pre-trained neural network model used for this test can be found at the following link:
