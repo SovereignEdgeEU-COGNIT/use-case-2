@@ -5,7 +5,7 @@ The repository contains an *examples* folder where the software and the images t
 
 ## Neural network model
 The pre-trained neural network model used for this test can be found at the following link:
-https://github.com/tobybreckon/fire-detection-cnn. Minor changes have been performed to the software provided to adapt it to our needs.
+https://github.com/tobybreckon/fire-detection-cnn. Minor changes have been performed to the provided software to adapt it to our needs.
 
 ## Setting up the image
 The virtual machine requirements to run the image recognition function are a memory size of at least 3.072 GB and a disk size of 8 GB. Additionally, it must support SSE4.1 instructions so the VM template CPU mode must be set on "host-passthrough".
