@@ -15,7 +15,7 @@ Then, activate the virtual environment (https://github.com/SovereignEdgeEU-COGNI
 ```
 source /root/serverless-runtime/serverless-env/bin/activate
 ```
-*libGL* library (needed for the installation of "opencv-contrib-python") can be installed on openSUSE distribution through the following commands:
+*libGL* library (required for the installation of "opencv-contrib-python") can be installed on openSUSE distribution through the following commands:
 ```
 zypper install Mesa-libGL1
 zypper install libgthread-2_0-0
