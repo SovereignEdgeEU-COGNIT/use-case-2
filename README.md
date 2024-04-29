@@ -12,18 +12,18 @@ The virtual machine requirements to run the image recognition function are a mem
 
 To set up the image, upload the FireUC folder to the *VM* in /root/FireUC. 
 Then, activate the virtual environment (https://github.com/SovereignEdgeEU-COGNIT/serverless-runtime):
-'''
+```
 source /root/serverless-runtime/serverless-env/bin/activate
-'''
+```
 *libGL* library (needed for the installation of "opencv-contrib-python") can be installed on openSUSE distribution through the following commands:
-'''
+```
 zypper install Mesa-libGL1
 zypper install libgthread-2_0-0
-'''
+```
 Finally, the requirements listed into "/root/FireUC/requirements.txt" can be installed:
-'''
+```
 pip install -r requirements.txt
-'''
+```
 ## Function offload
 To offload the function, the variable REQ_TIMEOUT variable in the Serverless Runtime Client (https://github.com/SovereignEdgeEU-COGNIT/device-runtime-py/blob/main/cognit/modules/_serverless_runtime_client.py) should be increased to 20 to give TensorFlow enough time to be loaded. The image to analyse is hardcoded into the software itself and is stored in the "image" variable. The function returns:
 * 0: a fire is NOT detected
