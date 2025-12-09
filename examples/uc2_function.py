@@ -1,4 +1,4 @@
-def fire_presence_detection(im: list[list[int]]) -> str | bool:
+def fire_presence_detection(im: list[list[list[int]]]) -> str | bool:
     import sys
     import traceback
 
@@ -7,7 +7,7 @@ def fire_presence_detection(im: list[list[int]]) -> str | bool:
         import os
         f = open('/dev/null','w')
         sys.stdout = f
-        
+
         import cv2
         import tflearn #type: ignore
         import numpy as np
@@ -96,7 +96,7 @@ def fire_presence_detection(im: list[list[int]]) -> str | bool:
                                 loss='categorical_crossentropy',
                                 learning_rate=0.001)
         else:
-            network = loss;
+            network = loss
 
         model = tflearn.DNN(network, checkpoint_path='inceptiononv1onfire',
                             max_checkpoints=1, tensorboard_verbose=2)

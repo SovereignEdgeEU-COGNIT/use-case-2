@@ -1,0 +1,23 @@
+# .env
+.env
+
+# VSCode settings
+.vscode/
+
+# Python bytecode
+.pytest_cache/
+__pycache__/
+
+# Python virtual environments
+venv/
+.venv/
+
+# Aactivator files
+.activate.sh
+.deactivate.sh
+
+# Mac OS files
+.DS_Store
+
+# Other
+examples/cognit-uc2.yml
