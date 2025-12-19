@@ -115,17 +115,19 @@ class BokehServerMap(BokehServer):
         self.park_loc = None
         self.fire_area_loc = None
         self.smoke_area_loc = None
+        self.timings = None
         self.smoke_fire_area_present = False
         self.data_frames_setup = False
         self.update_park = False
         
-    def add_data(self, devices_frame, fire_point, park_loc, fire_area_loc, smoke_area_loc):
+    def add_data(self, devices_frame, fire_point, park_loc, fire_area_loc, smoke_area_loc, timings):
         """Method to add data to the server."""
         self.devices_frame = devices_frame
         self.fire_point = fire_point
         self.park_loc = park_loc
         self.fire_area_loc = fire_area_loc
         self.smoke_area_loc = smoke_area_loc
+        self.timings = timings
         if not self.data_frames_setup:
             self.setup_data_frames()
 
@@ -142,7 +144,11 @@ class BokehServerMap(BokehServer):
         self.activated_devices = ColumnDataSource(data=dict(
             x = [0],
             y = [0],
-        ))                               
+        ))
+        self.timings_source = ColumnDataSource(data=dict(
+            x = list(range(len(self.timings))),
+            y = self.timings,
+        ))
         self.fire = ColumnDataSource(data=dict(
             lon=[self.fire_point.x],
             lat=[self.fire_point.y],
@@ -189,6 +195,10 @@ class BokehServerMap(BokehServer):
         self.activated_devices.data.update(
             x=x_activated_devices,
             y=history_active_devices,
+        )
+        self.timings_source.data.update(
+            x = list(range(len(self.timings))),
+            y = self.timings,
         )
         alpha = 0.2 if self.smoke_fire_area_present else 0.0
         if isinstance(self.fire_area_loc, Polygon):
@@ -247,20 +257,28 @@ class BokehServerMap(BokehServer):
                            x_axis_label='Step',
                            y_axis_label='Active Devices',
                            sizing_mode='scale_width',
+                           height=400,
+                           )
+        timing_plot = figure(title='Offloading Time',
+                           x_axis_label='Step',
+                           y_axis_label='Offloading Time',
+                           sizing_mode='scale_width',
+                           height=400,
                            )
         blank_spacer = Spacer(height_policy='max')
         self.map_name_select = Select(title="Map name", value=self.map_names[0], options=self.map_names)
-        self.wind_direction_slider = Slider(title="Wind direction", value=40, start=0, end=350, step=10)
-        self.wind_speed_slider = Slider(title="Wind speed", value=100, start=10, end=400, step=10)
+        self.wind_direction_slider = Slider(title="Wind direction [°N]", value=40, start=0, end=350, step=10)
+        self.wind_speed_slider = Slider(title="Wind speed [m/s]", value=5, start=1, end=20, step=1)
         self.start_button = Button(icon=TablerIcon('player-play'), label='Start', button_type='success', min_width=300, max_width=500, width_policy='max', margin=(50,10,50,0))
         self.start_button.on_click(self._start_button_click)
-        c = column([line_plot, self.map_name_select, self.wind_direction_slider, self.wind_speed_slider, blank_spacer, self.start_button],
+        c = column([line_plot, timing_plot, self.map_name_select, self.wind_direction_slider, self.wind_speed_slider, blank_spacer, self.start_button],
                    sizing_mode='scale_width',
                    width_policy='min',
                    min_width=300,
                    max_width=500,
                    )
         self.line = line_plot.vbar(x='x', top='y', source=self.activated_devices, width=0.5, color='green')
+        self.timing_line = timing_plot.vbar(x='x', top='y', source=self.timings_source, width=0.5, color='blue')
         grid_plot = row([self.map_plot,c],sizing_mode='scale_both')
         # page_layout = column(title_div, grid_plot, sizing_mode='scale_both')
         doc.add_root(grid_plot)

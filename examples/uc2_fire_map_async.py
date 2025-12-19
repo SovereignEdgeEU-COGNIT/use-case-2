@@ -4,7 +4,7 @@ import os
 import warnings
 import webbrowser
 from pathlib import Path
-from time import sleep
+import time
 
 import fiona
 import geopandas as gpd
@@ -51,7 +51,11 @@ class MapAsync:
 
     @property
     def fire_speed(self) -> float:
-        return self.fire_speed_multiplier*self.wind_speed*0.0001
+        return self.fire_speed_multiplier*self.wind_speed*0.00002
+    
+    @property
+    def wind_rotation(self) -> float:
+        return (90 - self.wind_direction) % 360
 
     @property
     def park_filepath(self) -> Path:
@@ -129,23 +133,26 @@ class MapAsync:
         self.fire_point = uc2_utils.generate_random_points_in_polygon(self.park_polygon, 1)[0]
         self.fire_area_maj_ax = self.initial_fire_size
         self.fire_area_min_ax = self.initial_fire_size
-        self.fire_area = uc2_utils.elliptical_buffer(self.fire_point, self.fire_area_maj_ax, self.fire_area_min_ax, self.wind_direction)
+        self.fire_area = uc2_utils.elliptical_buffer(self.fire_point, self.fire_area_maj_ax, self.fire_area_min_ax, self.wind_rotation)
         self.smoke_area_maj_ax = self.initial_fire_size + self.smoke_area_offset
         self.smoke_area_min_ax = self.initial_fire_size + self.smoke_area_offset
-        self.smoke_area = uc2_utils.elliptical_buffer(self.fire_point, self.smoke_area_maj_ax, self.smoke_area_min_ax, self.wind_direction)
+        self.smoke_area = uc2_utils.elliptical_buffer(self.fire_point, self.smoke_area_maj_ax, self.smoke_area_min_ax, self.wind_rotation)
+
+        self.timings = [0]
     
     def _plot_fire_and_devices(self):
         self.bokeh_server.smoke_fire_area_present = True
         self.bokeh_server.devices_frame = self.devices_frame
         self.bokeh_server.fire_area_loc = self.fire_area
         self.bokeh_server.smoke_area_loc = self.smoke_area
+        self.bokeh_server.timings = self.timings
         self.bokeh_server.update_requested = True
     
     def _create_plot(self):
 
         available_files = sorted([os.path.splitext(f)[0] for f in os.listdir(self.park_dir) if f.endswith('.kml')])
         
-        map_options = GMapOptions(lat=self.park_polygon.centroid.y, lng=self.park_polygon.centroid.x, map_type="terrain", zoom=10)
+        map_options = GMapOptions(lat=self.park_polygon.centroid.y, lng=self.park_polygon.centroid.x, map_type="terrain", zoom=15)
         self.bokeh_server = BokehServerMap(self.api_key, 'Device activation status', map_options, available_files)
         self.bokeh_server.add_data(
             self.devices_frame,
@@ -153,6 +160,7 @@ class MapAsync:
             self.park_polygon,
             self.fire_area,
             self.smoke_area,
+            self.timings,
         )
         self.bokeh_server.start_bokeh_server()
 
@@ -183,19 +191,19 @@ class MapAsync:
         for i in range(self.simulations_steps):
             logger.info(f'Simulation step {i+1}/{self.simulations_steps}')
             # Adjust fire center
-            self.fire_point = uc2_utils.move_point(self.fire_point, self.fire_speed, self.wind_direction)
+            self.fire_point = uc2_utils.move_point(self.fire_point, self.fire_speed, self.wind_rotation)
             
             # Create new fire area
             self.fire_area_maj_ax += self.fire_speed*2
             self.fire_area_min_ax += self.fire_speed
-            self.fire_area = uc2_utils.elliptical_buffer(self.fire_point, self.fire_area_maj_ax, self.fire_area_min_ax, self.wind_direction)
+            self.fire_area = uc2_utils.elliptical_buffer(self.fire_point, self.fire_area_maj_ax, self.fire_area_min_ax, self.wind_rotation)
             self.fire_area = self.fire_area.intersection(self.park_polygon)
 
             
             # Create new smoke area
             self.smoke_area_maj_ax += self.fire_speed*2
             self.smoke_area_min_ax += self.fire_speed
-            self.smoke_area = uc2_utils.elliptical_buffer(self.fire_point, self.smoke_area_maj_ax, self.smoke_area_min_ax, self.wind_direction)
+            self.smoke_area = uc2_utils.elliptical_buffer(self.fire_point, self.smoke_area_maj_ax, self.smoke_area_min_ax, self.wind_rotation)
             self.smoke_area = self.smoke_area.intersection(self.park_polygon)
             
             # Check intersection with devices
@@ -203,7 +211,11 @@ class MapAsync:
             self.devices_frame['status'][self.devices_frame['coverage'].intersects(self.fire_area)] = 'fire'
 
             # Activate said devices
+            t0 = time.monotonic()
             await self.send_requests()
+            t1 = time.monotonic()
+            self.timings.append(t1 - t0)
+            logger.info(f'Simulation step {i+1} took {self.timings[-1]:.2f} seconds.')
             # Plot, if necessary
             if self.plotting:
                 self._plot_fire_and_devices()
@@ -215,7 +227,7 @@ class MapAsync:
             if self.bokeh_server.running:
                 asyncio.run(self.spread_fire())
             else:
-                sleep(0.1)
+                time.sleep(0.1)
             
 
 if __name__ == '__main__':
