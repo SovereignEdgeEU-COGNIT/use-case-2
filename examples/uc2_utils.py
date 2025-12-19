@@ -31,6 +31,20 @@ class Coordinates(NamedTuple):
     def __eq__(self, other: Coordinates) -> bool:
         return self.x == other.x and self.y == other.y
 
+IDS = {}
+
+def get_id(loc) -> int:
+    """Gets a unique ID for a given location.
+
+    Args:
+        loc: The coordinates of the device.
+
+    Returns:
+        int: A unique ID for the device.
+    """
+    if loc not in IDS:
+        IDS[loc] = len(IDS) + 1
+    return IDS[loc]
 
 def detection_probability(dist_x: int, dist_y: int, base_probability: float) -> float:
     """Calculates detection probability based on distance from the center.
@@ -150,17 +164,18 @@ async def offload_function(image_path: str, loc: T) -> tuple[str | bool, T]:
             - The coordinates of the device.
     """
     REQS_INIT = {
-    "ID": "deviceNatureFR1",
-    "FLAVOUR": "NatureFR",
-    # "PROVIDERS": ["Nature4"],
-    "IS_CONFIDENTIAL": False,
-    "GEOLOCATION": {
-        "latitude": 42.449,
-        "longitude": 12.0864,
-    },
-}
+        "ID": f"deviceNatureFR{get_id(loc)}",
+        "FLAVOUR": "NatureFR",
+        # "PROVIDERS": ["Nature4"],
+        "IS_CONFIDENTIAL": False,
+        "GEOLOCATION": {
+            "latitude": 42.449,
+            "longitude": 12.0864,
+       },
+    }
     if not isinstance(image_path, str):
         image_path = str(image_path)
+    logger.info(f'Device loc {loc}, device id {REQS_INIT["ID"]}')
     image = cv2.imread(image_path)
     resized_image = cv2.resize(image, (224, 224), cv2.INTER_AREA)
     image_list = resized_image.tolist()
@@ -184,17 +199,3 @@ async def offload_function(image_path: str, loc: T) -> tuple[str | bool, T]:
         logger.error("An exception has occured: %s", str(e))
         # exit(-1)
         return str(e), loc
-
-
-if __name__ == '__main__':
-    # Small script to test cognit
-    file_dir = os.path.dirname(os.path.abspath(__file__))
-    fire_img = os.path.join(file_dir, 'data','fire2.png')
-    wood_img = os.path.join(file_dir, 'data','wood2.png')
-    print('Offloading function with fire')
-    r, _ = asyncio.run(offload_function(fire_img, None))
-    print(r)
-    print('Offloading function with fire')
-    r, _ = asyncio.run(offload_function(wood_img, None))
-    print(r)
-    
