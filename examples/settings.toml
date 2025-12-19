@@ -1,15 +1,15 @@
 [general]
-# number_of_devices = 100
-device_spacing = 0.03
-device_trigger_radius = 1000
+number_of_devices = 200
+# device_spacing = 0.03
+device_trigger_radius = 90
 simulation_steps = 100
 
 [map]
-wind_speed = 100
+wind_speed = 5
 wind_direction = 40
-fire_speed_multiplier = 0.2
-initial_fire_size = 0.001
-smoke_area_offset = 0.050
+fire_speed_multiplier = 1
+initial_fire_size = 0.00005
+smoke_area_offset = 0.0025
 maps_save_path = "saved_maps"
 park_dir = 'maps'
 park_file = 'aspromonte.kml'
