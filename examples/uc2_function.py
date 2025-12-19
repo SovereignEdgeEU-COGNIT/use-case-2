@@ -120,11 +120,13 @@ def fire_presence_detection(im: list[list[list[int]]]) -> str | bool:
         output = model.predict([small_frame])
 
         # label image based on prediction
-
-        return round(output[0][0]) == 1 # equiv. to 0.5 threshold in [Dunnings / Breckon, 2018],  [Samarth/Bhowmik/Breckon, 2019] test code
+        ret = round(output[0][0]) == 1 # equiv. to 0.5 threshold in [Dunnings / Breckon, 2018],  [Samarth/Bhowmik/Breckon, 2019] test code
     except Exception as error:
         exc_info = sys.exc_info()
         sExceptionInfo = ''.join(traceback.format_exception(*exc_info))
         exc_type, exc_value, exc_context = sys.exc_info()
-        bug = str(sExceptionInfo)
-        return bug
+        ret = str(sExceptionInfo)
+    finally:
+        sys.stdout = sys.__stdout__
+        f.close()
+    return ret
