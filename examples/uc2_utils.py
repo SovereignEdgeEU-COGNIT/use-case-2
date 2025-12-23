@@ -181,7 +181,7 @@ async def offload_function(image_path: str, loc: T) -> tuple[str | bool, T]:
     image_list = resized_image.tolist()
     try:
         # Instantiate a device Device Runtime
-        my_device_runtime = device_runtime.DeviceRuntime("./cognit-uc2.yml")
+        my_device_runtime = device_runtime.DeviceRuntime("./cognit.yml")
         my_device_runtime.init(REQS_INIT)
         # Offload and execute a function
         ret = await asyncio.to_thread(my_device_runtime.call, fire_presence_detection,image_list)
