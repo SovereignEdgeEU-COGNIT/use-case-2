@@ -20,4 +20,4 @@ venv/
 .DS_Store
 
 # Other
-examples/cognit-uc2.yml
+examples/cognit.yml
